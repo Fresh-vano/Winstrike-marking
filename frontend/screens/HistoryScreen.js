@@ -12,22 +12,21 @@ const HistoryScreen = ({ navigation }) => {
   useEffect(() => {
     const getHistory = async () => {
       try {
-        const data = [
-          {
-            id: 1,
-            image_url: "https://your-server.com/images/detail1.jpg",
-            processed_at: "2024-04-01T10:00:00Z",
-            result: "Пропорции детали соответствуют стандарту.",
-          },
-          {
-            id: 2,
-            image_url: "https://your-server.com/images/detail2.jpg",
-            processed_at: "2024-04-02T12:30:00Z",
-            result: "Есть отклонения в размерах.",
-          }
-        ];
-
-        // const data = await fetchHistory();
+        // const data = [
+        //   {
+        //     id: 1,
+        //     image_url: "https://your-server.com/images/detail1.jpg",
+        //     processed_at: "2024-04-01T10:00:00Z",
+        //     result: "Пропорции детали соответствуют стандарту.",
+        //   },
+        //   {
+        //     id: 2,
+        //     image_url: "https://your-server.com/images/detail2.jpg",
+        //     processed_at: "2024-04-02T12:30:00Z",
+        //     result: "Есть отклонения в размерах.",
+        //   }
+        // ];
+        const data = await fetchHistory();
         setHistory(data);
       } catch (err) {
         setError(err);
@@ -46,10 +45,12 @@ const HistoryScreen = ({ navigation }) => {
     >
       <Card style={styles.card}>
         <View style={styles.cardContent}>
-          <Image source={{ uri: item.image_url }} style={styles.thumbnail} />
+          <Image source={{ uri: item.image_path }} style={styles.thumbnail} />
           <View style={styles.textContainer}>
-            <Text style={styles.date}>{new Date(item.processed_at).toLocaleString()}</Text>
-            <Text style={styles.result}>{item.result}</Text>
+            <Text style={styles.date}>{new Date(item.created_at).toLocaleString()}</Text>
+            <Text style={styles.result}>
+              {item.is_correct ? 'Распознавание успешно' : 'Распознавание ошибочно'}
+            </Text>
           </View>
         </View>
       </Card>
@@ -85,47 +86,47 @@ const HistoryScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: '#f5f5f5',
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  card: {
-    marginBottom: 10,
-    backgroundColor: '#ffffff', // Изменение фона карточки на белый
-    borderRadius: 8,
-    padding: 10,
-  },
-  cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  thumbnail: {
-    width: 70,
-    height: 70, // Квадратное изображение
-    borderRadius: 8,
-    marginRight: 10, // Отступ от текста
-  },
-  textContainer: {
-    flex: 1,
-  },
-  date: {
-    fontSize: 12,
-    color: 'gray',
-    marginBottom: 5,
-  },
-  result: {
-    fontSize: 14,
-    color: '#333',
-  },
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
-
-export default HistoryScreen;
+    container: {
+      flex: 1,
+      padding: 10,
+      backgroundColor: '#f5f5f5',
+    },
+    list: {
+      paddingBottom: 20,
+    },
+    card: {
+      marginBottom: 10,
+      backgroundColor: '#ffffff',
+      borderRadius: 8,
+      padding: 10,
+    },
+    cardContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    thumbnail: {
+      width: 70,
+      height: 70,
+      borderRadius: 8,
+      marginRight: 10,
+    },
+    textContainer: {
+      flex: 1,
+    },
+    date: {
+      fontSize: 12,
+      color: 'gray',
+      marginBottom: 5,
+    },
+    result: {
+      fontSize: 14,
+      color: '#333',
+    },
+    loader: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  });
+  
+  export default HistoryScreen;

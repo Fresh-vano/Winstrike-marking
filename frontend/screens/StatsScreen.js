@@ -1,4 +1,3 @@
-// screens/StatsScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { Text, Card } from 'react-native-paper';
@@ -15,20 +14,7 @@ const StatsScreen = () => {
   useEffect(() => {
     const getStats = async () => {
       try {
-        const data = {
-          total_uploads: 150,
-          successful_analysis: 140,
-          failed_analysis: 10,
-          analysis_over_time: [
-            { date: "2024-04-01", count: 10 },
-            { date: "2024-04-02", count: 15 },
-          ],
-          result_distribution: {
-            "Соответствует": 140,
-            "Не соответствует": 10
-          }
-        };
-        // const data = await fetchStats();
+        const data = await fetchStats();
         setStats(data);
       } catch (err) {
         setError(err);
@@ -66,7 +52,6 @@ const StatsScreen = () => {
       },
     ],
   };
-
   const pieChartData = Object.keys(stats.result_distribution).map((key, index) => ({
     name: key,
     population: stats.result_distribution[key],
@@ -79,19 +64,19 @@ const StatsScreen = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.title}>Общая Статистика</Text>
+          <Text style={styles.title}>Общая статистика</Text>
           <Text style={styles.statText}>Всего загрузок: {stats.total_uploads}</Text>
-          <Text style={styles.statText}>Успешных анализов: {stats.successful_analysis}</Text>
-          <Text style={styles.statText}>Неуспешных анализов: {stats.failed_analysis}</Text>
+          <Text style={styles.statText}>Верно распознано: {stats.total_true}</Text>
+          <Text style={styles.statText}>Неверно распознано: {stats.total_false}</Text>
         </Card.Content>
       </Card>
 
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.title}>Анализы во Времени</Text>
+          <Text style={styles.title}>Анализы за неделю</Text>
           <LineChart
             data={lineChartData}
-            width={screenWidth - 40} // Ограничиваем ширину графика
+            width={screenWidth - 40}
             height={220}
             yAxisLabel=""
             yAxisSuffix=""
@@ -104,17 +89,21 @@ const StatsScreen = () => {
 
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.title}>Распределение Результатов</Text>
-          <PieChart
-            data={pieChartData}
-            width={screenWidth - 40} // Ограничиваем ширину графика
-            height={220}
-            chartConfig={chartConfig}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            absolute
-          />
+          <Text style={styles.title}>Распределение по станциям</Text>
+          {Object.keys(stats.result_distribution).length === 0 ? (
+            <Text style={styles.statText1}>Нет данных</Text>
+            ) : (
+                <PieChart
+                  data={pieChartData}
+                  width={screenWidth - 40} // Ограничиваем ширину графика
+                  height={220}
+                  chartConfig={chartConfig}
+                  accessor="population"
+                  backgroundColor="transparent"
+                  paddingLeft="15"
+                  absolute
+                />
+              )}
         </Card.Content>
       </Card>
     </ScrollView>
@@ -167,6 +156,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     marginBottom: 5,
+  },
+  statText1: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 5,
+    alignSelf: 'center',
   },
   chart: {
     marginVertical: 8,

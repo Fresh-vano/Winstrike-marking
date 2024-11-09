@@ -1,13 +1,15 @@
-// screens/UploadScreen.js
 import React, { useState } from 'react';
-import { View, Image, StyleSheet, Alert, Dimensions, FlatList, TouchableOpacity } from 'react-native';
+import { View, Image, StyleSheet, Alert, Dimensions, ActivityIndicator } from 'react-native';
 import { Button, Text, IconButton, useTheme } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import { uploadPhotos } from '../api/upload';
 
 const screenWidth = Dimensions.get('window').width;
 
-const UploadScreen = () => {
+const UploadScreen = ({ navigation }) => {
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
   const theme = useTheme();
 
   const pickImage = async () => {
@@ -21,9 +23,10 @@ const UploadScreen = () => {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      base64: true,  // Запрашиваем изображение в Base64
     });
     if (!result.canceled) {
-      setImages((prevImages) => [...prevImages, result.assets[0].uri]);
+      setImages((prevImages) => [...prevImages, result.assets[0]]);
     }
   };
 
@@ -37,22 +40,38 @@ const UploadScreen = () => {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      base64: true,  // Запрашиваем изображение в Base64
     });
     if (!result.canceled) {
-      setImages((prevImages) => [...prevImages, result.assets[0].uri]);
+      setImages((prevImages) => [...prevImages, result.assets[0]]);
     }
   };
 
   const deleteImage = (uri) => {
-    setImages((prevImages) => prevImages.filter((image) => image !== uri));
+    setImages((prevImages) => prevImages.filter((image) => image.uri !== uri));
   };
 
-  const sendForProcessing = () => {
+  const sendForProcessing = async () => {
     if (images.length === 0) {
       Alert.alert('Нет изображений', 'Пожалуйста, загрузите или сфотографируйте деталь.');
       return;
     }
-    Alert.alert('Отправлено', 'Изображения отправлены на обработку.');
+  
+    setLoading(true); // Показываем индикатор загрузки
+    try {
+      const response = await uploadPhotos({ images }); // Отправляем массив изображений
+      
+      if (response.created_ids && response.created_ids.length > 0) {
+        // Переходим к экрану HistoryDetail с id первой новой записи
+        navigation.navigate('HistoryDetail', { id: response.created_ids[0] });
+      } else {
+        Alert.alert('Ошибка', 'Не удалось обработать изображения. Попробуйте снова.');
+      }
+    } catch (error) {
+      Alert.alert('Ошибка', 'Произошла ошибка при загрузке изображений. Попробуйте снова.');
+    } finally {
+      setLoading(false); // Скрываем индикатор загрузки
+    }
   };
 
   return (
@@ -60,18 +79,19 @@ const UploadScreen = () => {
       <Text style={styles.title}>Загрузите или сфотографируйте деталь</Text>
       <View style={styles.imageList}>
         {images.map((item) => (
-            <View key={item} style={styles.imageWrapper}>
-            <Image source={{ uri: item }} style={styles.thumbnail} />
+          <View key={item.uri} style={styles.imageWrapper}>
+            <Image source={{ uri: item.uri }} style={styles.thumbnail} />
             <IconButton
-                icon="close-circle"
-                size={20}
-                color={theme.colors.error}
-                onPress={() => deleteImage(item)}
-                style={styles.deleteIcon}
+              icon="close-circle"
+              size={20}
+              color={theme.colors.error}
+              onPress={() => deleteImage(item.uri)}
+              style={styles.deleteIcon}
             />
-            </View>
+          </View>
         ))}
       </View>
+
       <View style={styles.buttonContainer}>
         <Button
           mode="contained"
@@ -92,15 +112,18 @@ const UploadScreen = () => {
           Сделать фото
         </Button>
       </View>
+
       <Button
         mode="contained"
         onPress={sendForProcessing}
-        disabled={images.length === 0}
-        style={[styles.sendButton, { backgroundColor: images.length > 0 ? theme.colors.primary : '#ccc' }]}
+        disabled={images.length === 0 || loading}
+        style={[styles.sendButton, { backgroundColor: images.length > 0 && !loading ? theme.colors.primary : '#ccc' }]}
         labelStyle={styles.buttonText}
       >
         Отправить на обработку
       </Button>
+
+      {loading && <ActivityIndicator size="large" color="#6200ee" style={styles.loader} />}
     </View>
   );
 };
@@ -125,8 +148,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     paddingVertical: 10,
-    minHeight: 100, // Задает минимальную высоту блока
-  alignItems: 'center', // Центрирует содержимое по вертикали
+    minHeight: 100,
+    alignItems: 'center',
   },
   imageWrapper: {
     position: 'relative',
@@ -166,6 +189,9 @@ const styles = StyleSheet.create({
     width: '80%',
     paddingVertical: 8,
     borderRadius: 25,
+  },
+  loader: {
+    marginTop: 20,
   },
 });
 
