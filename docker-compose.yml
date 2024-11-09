@@ -20,11 +20,13 @@ services:
       dockerfile: Dockerfile
     image: freshvano/winstrike-marking-backend
     environment:
-      DATABASE_URL: postgresql://postgres:11111111@localhost:5432/postgres
+      DATABASE_URL: postgresql://postgres:11111111@db:5432/postgres
     depends_on:
       - db
     ports:
       - "5000:5000"
+    command: >
+      sh -c "flask db upgrade && flask run"
     networks:
       - app-network
 
