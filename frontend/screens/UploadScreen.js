@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Image, StyleSheet, Alert, Dimensions, ActivityIndicator } from 'react-native';
 import { Button, Text, IconButton, useTheme } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import { uploadPhotos } from '../api/upload';
+import { toast } from 'react-toastify';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -15,7 +15,7 @@ const UploadScreen = ({ navigation }) => {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Разрешение требуется', 'Мы нуждаемся в доступе к вашей галерее.');
+      toast.error('Разрешение требуется. Мы нуждаемся в доступе к вашей галерее.');
       return;
     }
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -33,7 +33,7 @@ const UploadScreen = ({ navigation }) => {
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Разрешение требуется', 'Мы нуждаемся в доступе к вашей камере.');
+      toast.error('Разрешение требуется. Мы нуждаемся в доступе к вашей камере.');
       return;
     }
     let result = await ImagePicker.launchCameraAsync({
@@ -50,10 +50,11 @@ const UploadScreen = ({ navigation }) => {
   const deleteImage = (uri) => {
     setImages((prevImages) => prevImages.filter((image) => image.uri !== uri));
   };
-
+  
+  // Функция для отправки на обработку с навигацией после загрузки
   const sendForProcessing = async () => {
     if (images.length === 0) {
-      Alert.alert('Нет изображений', 'Пожалуйста, загрузите или сфотографируйте деталь.');
+      toast.error('Нет изображений. Пожалуйста, загрузите или сфотографируйте деталь.');
       return;
     }
   
@@ -63,17 +64,18 @@ const UploadScreen = ({ navigation }) => {
       
       if (response.created_ids && response.created_ids.length > 0) {
         // Переходим к экрану HistoryDetail с id первой новой записи
-        navigation.navigate('HistoryDetail', { id: response.created_ids[0] });
+        navigation.navigate('HistoryDetail', { id: response.created_ids[0].id });
       } else {
-        Alert.alert('Ошибка', 'Не удалось обработать изображения. Попробуйте снова.');
+        toast.error('Не удалось обработать изображения. Попробуйте снова.');
       }
     } catch (error) {
-      Alert.alert('Ошибка', 'Произошла ошибка при загрузке изображений. Попробуйте снова.');
+      toast.error('Произошла ошибка при загрузке изображений. Попробуйте снова.');
     } finally {
       setLoading(false); // Скрываем индикатор загрузки
+      setImages([]);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Загрузите или сфотографируйте деталь</Text>

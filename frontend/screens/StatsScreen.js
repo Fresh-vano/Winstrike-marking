@@ -1,31 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Dimensions, ActivityIndicator, Alert } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, StyleSheet, ScrollView, Dimensions, ActivityIndicator, Alert  } from 'react-native';
 import { Text, Card } from 'react-native-paper';
 import { fetchStats } from '../api/stats';
 import { LineChart, PieChart } from 'react-native-chart-kit';
-
-const screenWidth = Dimensions.get('window').width;
+import { useFocusEffect } from '@react-navigation/native';  
+import { toast } from 'react-toastify';
 
 const StatsScreen = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [windowWidth, setWindowWidth] = useState(Dimensions.get('window').width);
 
   useEffect(() => {
+    const handleResize = () => setWindowWidth(Dimensions.get('window').width);
+    Dimensions.addEventListener('change', handleResize);
+
+    return () => {
+      Dimensions.removeEventListener('change', handleResize);
+    };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
     const getStats = async () => {
       try {
         const data = await fetchStats();
         setStats(data);
       } catch (err) {
         setError(err);
-        Alert.alert('Ошибка', 'Не удалось загрузить статистику. Попробуйте позже.');
+        toast.error('Не удалось загрузить статистику. Попробуйте позже.');
       } finally {
         setLoading(false);
       }
     };
 
     getStats();
-  }, []);
+    }, [])
+  );
 
   if (loading) {
     return (
@@ -76,7 +88,7 @@ const StatsScreen = () => {
           <Text style={styles.title}>Анализы за неделю</Text>
           <LineChart
             data={lineChartData}
-            width={screenWidth - 40}
+            width={windowWidth - 40}
             height={220}
             yAxisLabel=""
             yAxisSuffix=""
@@ -95,12 +107,12 @@ const StatsScreen = () => {
             ) : (
                 <PieChart
                   data={pieChartData}
-                  width={screenWidth - 40} // Ограничиваем ширину графика
-                  height={220}
+                  width={windowWidth - 40} // Ограничиваем ширину графика
+                  height={windowWidth < 550 ? 110 : 220}
                   chartConfig={chartConfig}
                   accessor="population"
                   backgroundColor="transparent"
-                  paddingLeft="15"
+                  paddingLeft={windowWidth < 550 ? "0" : "15"}
                   absolute
                 />
               )}

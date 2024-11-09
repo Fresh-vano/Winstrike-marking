@@ -1,43 +1,34 @@
 // screens/HistoryScreen.js
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, FlatList, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Text, Card } from 'react-native-paper';
 import { fetchHistory } from '../api/history';
+import { useFocusEffect } from '@react-navigation/native';  
+import { toast } from 'react-toastify';
 
 const HistoryScreen = ({ navigation }) => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const getHistory = async () => {
-      try {
-        // const data = [
-        //   {
-        //     id: 1,
-        //     image_url: "https://your-server.com/images/detail1.jpg",
-        //     processed_at: "2024-04-01T10:00:00Z",
-        //     result: "Пропорции детали соответствуют стандарту.",
-        //   },
-        //   {
-        //     id: 2,
-        //     image_url: "https://your-server.com/images/detail2.jpg",
-        //     processed_at: "2024-04-02T12:30:00Z",
-        //     result: "Есть отклонения в размерах.",
-        //   }
-        // ];
-        const data = await fetchHistory();
-        setHistory(data);
-      } catch (err) {
-        setError(err);
-        Alert.alert('Ошибка', 'Не удалось загрузить историю. Попробуйте позже.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  useFocusEffect(
+    useCallback(() => {
+      const getHistory = async () => {
+        setLoading(true);
+        try {
+          const data = await fetchHistory();
+          setHistory(data);
+        } catch (err) {
+          setError(err);
+          toast.error('Не удалось загрузить историю. Попробуйте позже.');
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    getHistory();
-  }, []);
+      getHistory();
+    }, [])
+  );
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -45,7 +36,7 @@ const HistoryScreen = ({ navigation }) => {
     >
       <Card style={styles.card}>
         <View style={styles.cardContent}>
-          <Image source={{ uri: item.image_path }} style={styles.thumbnail} />
+          <Image source={{ uri: `http://localhost:5000/api/photo?path=${item.image_path}` }} style={styles.thumbnail} />
           <View style={styles.textContainer}>
             <Text style={styles.date}>{new Date(item.created_at).toLocaleString()}</Text>
             <Text style={styles.result}>

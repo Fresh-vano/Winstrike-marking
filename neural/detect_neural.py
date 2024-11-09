@@ -12,10 +12,10 @@ import time
 INPUT_PATH = r"..\..\..\train_atom\train\imgs"
 OUTPUT_PATH = r"..\..\..\output_imgs"
 
-YOLO_MODEL_PATH = r"..\models\yolov11.pt"
+YOLO_MODEL_PATH = r"..\neural\models\yolov11.pt"
 OCR_MODEL_PARAMS = {
     "lang_list": ['en', 'ru'],
-    "gpu": True
+    "gpu": False
 }
 
 
@@ -25,14 +25,14 @@ OCR_MODEL = easyocr.Reader(**OCR_MODEL_PARAMS)
 # Функция для детекции и отрисовки рамок
 
 
-def detect_and_draw_boxes(image_path: str, yolo_model, save_path):
-
+def detect_and_draw_boxes(image_path: str, save_path):
+    global YOLO_MODEL
     # Загружаем изображение
     image = cv2.imread(image_path)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     # Выполняем детекцию
-    results = yolo_model(image_rgb)
+    results = YOLO_MODEL(image_rgb)
 
     # Копируем изображение для отрисовки
     image_copy = image_rgb.copy()
@@ -111,4 +111,4 @@ def transform_images(images_list: list):
 
 if __name__ == "__main__":
     print(detect_and_draw_boxes(
-        r"..\..\train_atom\save_imgs\458.jpg", YOLO_MODEL, OUTPUT_PATH))
+        r"..\..\train_atom\save_imgs\458.jpg", OUTPUT_PATH))

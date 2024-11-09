@@ -18,3 +18,8 @@ export const fetchHistoryDetail = async (id) => {
     throw error;
   }
 };
+
+export const updateRecognition = async (id, data) => {
+    const response = await api.put(`/history/${id}`, data);
+    return response.data;
+  };

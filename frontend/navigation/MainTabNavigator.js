@@ -5,11 +5,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
 
-// Импортируем наши страницы
 import UploadScreen from '../screens/UploadScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import StatsScreen from '../screens/StatsScreen';
 import HistoryDetailScreen from '../screens/HistoryDetailScreen';
+import AddDetailScreen from '../screens/AddDetailScreen';
 
 const Tab = createBottomTabNavigator();
 const HistoryStack = createStackNavigator();
@@ -22,6 +22,15 @@ const HistoryStackNavigator = () => {
     </HistoryStack.Navigator>
   );
 };
+
+const UploadStackNavigator = () => {
+    return (
+      <HistoryStack.Navigator>
+        <HistoryStack.Screen name="UploadScreen" component={UploadScreen} options={{ title: 'Загрузка' }} />
+        <HistoryStack.Screen name="HistoryDetail" component={HistoryDetailScreen} options={{ title: 'Детали' }} />
+      </HistoryStack.Navigator>
+    );
+  };
 
 const MainTabNavigator = () => {
   return (
@@ -38,6 +47,8 @@ const MainTabNavigator = () => {
               iconName = 'history';
             } else if (route.name === 'Статистика') {
               iconName = 'chart-bar';
+            }else if (route.name === 'Сборочная единица') {
+                iconName = 'script';
             }
 
             return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
@@ -48,7 +59,8 @@ const MainTabNavigator = () => {
       >
         <Tab.Screen name="Статистика" component={StatsScreen} />
         <Tab.Screen name="История" component={HistoryStackNavigator} options={{ headerShown: false }} />
-        <Tab.Screen name="Загрузка" component={UploadScreen} />
+        <Tab.Screen name="Загрузка" component={UploadStackNavigator} options={{ headerShown: false }}  />
+        <Tab.Screen name="Сборочная единица" component={AddDetailScreen}/>
       </Tab.Navigator>
     </NavigationContainer>
   );
