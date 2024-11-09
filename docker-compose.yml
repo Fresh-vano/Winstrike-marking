@@ -15,10 +15,12 @@ services:
       - app-network
 
   backend:
-    build: ./backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
     image: freshvano/winstrike-marking-backend
     environment:
-      DATABASE_URL: postgresql://postgres:11111111@localhost:5432/marking
+      DATABASE_URL: postgresql://postgres:11111111@localhost:5432/postgres
     depends_on:
       - db
     ports:
@@ -27,12 +29,14 @@ services:
       - app-network
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
     image: freshvano/winstrike-marking-frontend
     environment:
       REACT_APP_API_URL: http://backend:5000/api
     ports:
-      - "80:80"
+      - "80:8081"
     depends_on:
       - backend
     networks:

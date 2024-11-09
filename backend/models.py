@@ -33,16 +33,31 @@ class Recognition(db.Model):
     correct_part_number = db.Column(db.String(50), nullable=True)  # Верный артикул (если ошибка)
     correct_order_number = db.Column(db.Integer, nullable=True)  # Верный порядковый номер (если ошибка)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Время создания записи
-    recognized_text = db.Column(db.String(50), nullable=True) #Распознаный текст
+    recognition_duration = db.Column(db.Float, nullable=True)  # Длительность распознавания в секундах
+    recognized_part_number = db.Column(db.String(50), nullable=True) #Распознаный текст ДетальАртикул
+    recognized_order_number = db.Column(db.String(50), nullable=True) #Распознаный текст ПорядковыйНомер
     # Связь с таблицей details
     detail = db.relationship('Detail', backref=db.backref('recognitions', lazy=True))
 
-    def __init__(self, image_path, recognized_image_path=None, detail_id=None, is_correct=False, recognized_text=None, correct_part_number=None, correct_order_number=None):
+    def __init__(self, image_path, recognized_image_path=None, detail_id=None, is_correct=False, recognized_part_number=None, recognized_order_number=None, correct_part_number=None, correct_order_number=None, recognition_duration=None):
         self.image_path = image_path
         self.recognized_image_path = recognized_image_path
         self.detail_id = detail_id
         self.is_correct = is_correct
-        self.recognized_text = recognized_text
+        self.recognized_part_number = recognized_part_number
+        self.recognized_order_number = recognized_order_number
         self.correct_part_number = correct_part_number
         self.correct_order_number = correct_order_number
+        self.recognition_duration = recognition_duration
         self.created_at = datetime.utcnow() + timedelta(hours=3)
+
+class CorrectResult(db.Model):
+    __tablename__ = 'correctResult'
+
+    id = db.Column(db.Integer, primary_key=True)
+    predicted_text = db.Column(db.String(255), nullable=True)
+    true_text = db.Column(db.String(50), nullable=True)
+
+    def __init__(self, predicted_text, true_text):
+        self.predicted_text = predicted_text
+        self.true_text = true_text

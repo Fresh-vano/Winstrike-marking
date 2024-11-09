@@ -35,10 +35,11 @@ const HistoryDetailScreen = ({ route }) => {
       marginVertical: 10,
     },
     image: {
-      width: '100%',
-      height: 200,
-      borderRadius: 8,
-      marginBottom: 10,
+        width: '100%',           
+        height: 300,          
+        borderRadius: 8,
+        marginBottom: 10,
+        resizeMode: 'contain',   
     },
     noImageText: {
       fontSize: 14,
@@ -202,6 +203,9 @@ const HistoryDetailScreen = ({ route }) => {
           <Text style={styles.result}>
             {detail.is_correct ? 'Распознавание успешно' : 'Распознавание ошибочно'}
           </Text>
+          <Text style={styles.correctText}>Время распознавания: {detail.recognition_duration?.toFixed(3)} сек.</Text>
+          <Text style={styles.correctText}>Распознаный артикул: {detail.recognized_part_number}</Text>
+          <Text style={styles.correctText}>Распознаный порядковый номер: {detail.recognized_order_number}</Text>
           {!detail.is_correct && (
             <>
               <Text style={styles.correctText}>Верный артикул: {detail.correct_part_number || "не указан"}</Text>

@@ -1,23 +1,17 @@
 # app.py
 from flask import Flask, jsonify, request, abort, send_file
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import func, extract
+from sqlalchemy import func, extract, text
 from flask_migrate import Migrate
 from config import Config
-from models import db, Detail, Recognition
+from models import db, Detail, Recognition, CorrectResult
 from datetime import datetime, timedelta
-from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from sqlalchemy.orm import joinedload
-from fuzzywuzzy import fuzz
 import os
 import uuid
 import base64
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from neural.detect_neural import detect_and_draw_boxes
+import time
+from detect_neural import detect_and_draw_boxes
 
 app = Flask(__name__)
 app.config.from_object(Config) 
@@ -30,8 +24,53 @@ OUTPUT_FOLDER = 'static/output'
 os.makedirs(INPUT_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
+# обработка в нейронке
 def process_image(image_path, output_path):
     return detect_and_draw_boxes(image_path, output_path)
+
+def search_with_fuzzy_matching(recognized_text):
+    if not len(recognized_text):
+        return None
+
+    part_number = recognized_text[0]
+    order_number = recognized_text[1]
+
+    # Первоначальный поиск, предполагая что [0] - part_number и [1] - order_number
+    result = db.session.execute(
+        text("""
+            SELECT *
+            FROM details
+            WHERE similarity(part_number, :part_number) > 0.4
+            OR similarity(order_number::text, :order_number) > 0.4
+            ORDER BY GREATEST(similarity(part_number, :part_number), similarity(order_number::text, :order_number)) DESC
+            LIMIT 1
+        """),
+        {'part_number': part_number, 'order_number': order_number}
+    ).fetchone()
+
+    if not result:
+        # Второй поиск, меняя местами part_number и order_number
+        result = db.session.execute(
+            text("""
+                SELECT *
+                FROM details
+                WHERE similarity(part_number, :order_number) > 0.4
+                OR similarity(order_number::text, :part_number) > 0.4
+                ORDER BY GREATEST(similarity(part_number, :order_number), similarity(order_number::text, :part_number)) DESC
+                LIMIT 1
+            """),
+            {'part_number': order_number, 'order_number': part_number}
+        ).fetchone()
+
+    if not result:
+        correct_result = CorrectResult.query.filter_by(predicted_text=part_number).first()
+        
+        if correct_result:
+            true_text = correct_result.true_text
+            # Теперь ищем в Detail по полю part_number = true_text
+            result = Detail.query.filter_by(part_number=true_text).first()
+
+    return result
 
 # Добавление новой загрузки
 @app.route('/api/upload', methods=['POST'])
@@ -50,27 +89,16 @@ def upload_photos():
         img_data = base64.b64decode(img['base64'])
         with open(input_path, "wb") as f:
             f.write(img_data)
-
+        
+        start_time = time.time()
         # Отправляем изображение на нейросеть и получаем результат
         recognized_text = process_image(input_path, output_path)
-        print(recognized_text['default'][0])
+        recognition_duration = time.time() - start_time
+        print(recognition_duration)
 
         # Ищем совпадения в таблице Detail по распознанному тексту
-        # matching_detail = (
-        #     db.session.query(Detail)
-        #     .filter(fuzz.ratio(Detail.part_number, recognized_text) > 80)
-        #     .all()
-        # )
-        matching_detail = (
-            db.session.query(Detail)
-            .filter(Detail.part_number.ilike(f"%{recognized_text['default'][0]}%"))
-            .first()
-        )
-
-        # Сохраняем распознанное изображение и создаем новую запись Recognition
-        with open(output_path, "wb") as f:
-            f.write(img_data)
-
+        matching_detail = search_with_fuzzy_matching(recognized_text)
+        
         # Проверка, найдено ли совпадение
         if matching_detail:
             # Совпадение найдено, сохраняем с detail_id
@@ -79,14 +107,18 @@ def upload_photos():
                 recognized_image_path=output_path,
                 detail_id=matching_detail.id,
                 is_correct=True,
-                recognized_text=recognized_text['default'][0]
+                recognized_part_number=recognized_text[0], 
+                recognized_order_number=recognized_text[1],
+                recognition_duration=recognition_duration
             )
         else:
             # Совпадение не найдено, сохраняем без detail_id и с is_correct=False
             recognition = Recognition(
                 image_path=input_path,
                 is_correct=False,
-                recognized_text=recognized_text['default'][0]
+                recognized_part_number=recognized_text[0] if recognized_text else None,
+                recognized_order_number=recognized_text[1] if recognized_text else None,
+                recognition_duration=recognition_duration
             )
         
         # Добавляем запись и сохраняем в БД
@@ -114,7 +146,8 @@ def get_history():
             'correct_part_number': recognition.correct_part_number,
             'correct_order_number': recognition.correct_order_number,
             'created_at': recognition.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'recognized_text': recognition.recognized_text,
+            'recognized_part_number': recognition.recognized_part_number,
+            'recognized_order_number': recognition.recognized_order_number
         })
     
     return jsonify(history)
@@ -137,7 +170,9 @@ def get_history_detail(recognition_id):
         'correct_part_number': recognition.correct_part_number,
         'correct_order_number': recognition.correct_order_number,
         'created_at': recognition.created_at.strftime('%Y-%m-%d %H:%M:%S'),  # Форматирование даты
-        'recognized_text': recognition.recognized_text
+        'recognized_part_number': recognition.recognized_part_number,
+        'recognized_order_number': recognition.recognized_order_number,
+        'recognition_duration': recognition.recognition_duration
     }
 
     # Добавляем данные из detail, только если распознавание верное

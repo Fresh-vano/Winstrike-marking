@@ -12,9 +12,9 @@ import time
 INPUT_PATH = r"..\..\..\train_atom\train\imgs"
 OUTPUT_PATH = r"..\..\..\output_imgs"
 
-YOLO_MODEL_PATH = r"..\neural\models\yolov11.pt"
+YOLO_MODEL_PATH = r"yolov11.pt"
 OCR_MODEL_PARAMS = {
-    "lang_list": ['en', 'ru'],
+    "lang_list": ['en'],
     "gpu": False
 }
 
@@ -53,23 +53,23 @@ def detect_and_draw_boxes(image_path: str, save_path):
         cv2.rectangle(image_copy, (x_min, y_min),
                       (x_max, y_max), (0, 255, 0), 2)
 
-    cv2.imwrite(os.path.join(
-        save_path, image_path.split("\\")[-1]), image_copy)
+    cv2.imwrite(save_path, image_copy)
 
-    transformed_images = transform_images(text_imgs)
+    # transformed_images = transform_images(text_imgs)
 
-    text_result_dict = {}
+    # text_result_dict = {}
 
-    for key, value in transformed_images.items():
-        text_result = []
+    # for key, value in transformed_images.items():
+    text_result = []
 
-        for detected_contour_text in ocr_detect(OCR_MODEL, text_imgs):
-            for text_detect in detected_contour_text:
-                text_result.append(text_detect[1])
+    for detected_contour_text in ocr_detect(OCR_MODEL, text_imgs):
+        for text_detect in detected_contour_text:
+            text_result.append(text_detect[1])
 
-        text_result_dict[key] = text_result
+    # text_result_dict[key] = text_result
 
-    return text_result_dict
+    return text_result
+
 
 
 def ocr_detect(ocr_model: easyocr.Reader, imgs_list):
