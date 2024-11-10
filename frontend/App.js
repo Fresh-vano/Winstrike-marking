@@ -5,6 +5,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import 'react-native-gesture-handler';
 
 const queryClient = new QueryClient();
 

@@ -5,6 +5,7 @@ import { Text, Card } from 'react-native-paper';
 import { fetchHistory } from '../api/history';
 import { useFocusEffect } from '@react-navigation/native';  
 import { toast } from 'react-toastify';
+import { REACT_APP_API_URL } from '@env';
 
 const HistoryScreen = ({ navigation }) => {
   const [history, setHistory] = useState([]);
@@ -36,7 +37,7 @@ const HistoryScreen = ({ navigation }) => {
     >
       <Card style={styles.card}>
         <View style={styles.cardContent}>
-          <Image source={{ uri: `http://localhost:5000/api/photo?path=${item.image_path}` }} style={styles.thumbnail} />
+          <Image source={{ uri: `${REACT_APP_API_URL}/photo?path=${item.image_path}` }} style={styles.thumbnail} />
           <View style={styles.textContainer}>
             <Text style={styles.date}>{new Date(item.created_at).toLocaleString()}</Text>
             <Text style={styles.result}>

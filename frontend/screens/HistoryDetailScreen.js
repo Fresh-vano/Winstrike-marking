@@ -187,15 +187,15 @@ const HistoryDetailScreen = ({ route }) => {
         {detail.recognized_image_path ? (
             <>
                 <Text style={styles.title}>Распознанная фотография</Text>
-                <TouchableOpacity onPress={() => openModal(`http://localhost:5000/api/photo?path=${detail.recognized_image_path}`)}>
-                    <Image source={{ uri: `http://localhost:5000/api/photo?path=${detail.recognized_image_path}` }} style={styles.image} />
+                <TouchableOpacity onPress={() => openModal(`${REACT_APP_API_URL}/photo?path=${detail.recognized_image_path}`)}>
+                    <Image source={{ uri: `${REACT_APP_API_URL}/photo?path=${detail.recognized_image_path}` }} style={styles.image} />
                 </TouchableOpacity>
             </>
         ) : <></>}
 
         <Text style={styles.title}>Исходная фотография</Text>
-        <TouchableOpacity onPress={() => openModal(`http://localhost:5000/api/photo?path=${detail.image_path}`)}>
-          <Image source={{ uri: `http://localhost:5000/api/photo?path=${detail.image_path}` }} style={styles.image} />
+        <TouchableOpacity onPress={() => openModal(`${REACT_APP_API_URL}/photo?path=${detail.image_path}`)}>
+          <Image source={{ uri: `${REACT_APP_API_URL}/photo?path=${detail.image_path}` }} style={styles.image} />
         </TouchableOpacity>
 
         <View style={styles.infoContainer}>

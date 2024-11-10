@@ -69,7 +69,6 @@ const UploadScreen = ({ navigation }) => {
         toast.error('Не удалось обработать изображения. Попробуйте снова.');
       }
     } catch (error) {
-      toast.error('Произошла ошибка при загрузке изображений. Попробуйте снова.');
     } finally {
       setLoading(false); // Скрываем индикатор загрузки
       setImages([]);
