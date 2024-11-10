@@ -3,7 +3,7 @@ import { View, Image, StyleSheet, Alert, Dimensions, ActivityIndicator } from 'r
 import { Button, Text, IconButton, useTheme } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadPhotos } from '../api/upload';
-import { toast } from 'react-toastify';
+import Toast from 'react-native-toast-message';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -15,7 +15,10 @@ const UploadScreen = ({ navigation }) => {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      toast.error('Разрешение требуется. Мы нуждаемся в доступе к вашей галерее.');
+      Toast.show({
+        type: 'error',
+        text1: 'Разрешение требуется. Мы нуждаемся в доступе к вашей галерее.'
+      });
       return;
     }
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -33,7 +36,10 @@ const UploadScreen = ({ navigation }) => {
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      toast.error('Разрешение требуется. Мы нуждаемся в доступе к вашей камере.');
+      Toast.show({
+        type: 'error',
+        text1: 'Разрешение требуется. Мы нуждаемся в доступе к вашей камере.'
+      });
       return;
     }
     let result = await ImagePicker.launchCameraAsync({
@@ -54,7 +60,10 @@ const UploadScreen = ({ navigation }) => {
   // Функция для отправки на обработку с навигацией после загрузки
   const sendForProcessing = async () => {
     if (images.length === 0) {
-      toast.error('Нет изображений. Пожалуйста, загрузите или сфотографируйте деталь.');
+      Toast.show({
+        type: 'error',
+        text1: 'Нет изображений. Пожалуйста, загрузите или сфотографируйте деталь.'
+      });
       return;
     }
   
@@ -66,7 +75,10 @@ const UploadScreen = ({ navigation }) => {
         // Переходим к экрану HistoryDetail с id первой новой записи
         navigation.navigate('HistoryDetail', { id: response.created_ids[0].id });
       } else {
-        toast.error('Не удалось обработать изображения. Попробуйте снова.');
+        Toast.show({
+          type: 'error',
+          text1: 'Не удалось обработать изображения. Попробуйте снова.'
+        });
       }
     } catch (error) {
     } finally {

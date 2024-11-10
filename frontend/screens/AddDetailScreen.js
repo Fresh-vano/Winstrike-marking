@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Alert, Button, ScrollView } from 'react-native';
 import { Text, Card } from 'react-native-paper';
 import { addDetail } from '../api/details'; // Создадим API вызов для добавления детали
-import { toast } from 'react-toastify';
+import Toast from 'react-native-toast-message';
 
 const AddDetailScreen = ({ navigation }) => {
   const [partNumber, setPartNumber] = useState('');
@@ -57,9 +57,15 @@ const AddDetailScreen = ({ navigation }) => {
           setOrderId('');
           setStationBlock('');
       });
-      toast.success('Деталь успешно добавлена');
+      Toast.show({
+        type: 'success',
+        text1: 'Деталь успешно добавлена'
+      });
     } catch (err) {
-        toast.error('Не удалось сохранить данные. Попробуйте снова.');
+        Toast.show({
+            type: 'error',
+            text1: 'Не удалось сохранить данные. Попробуйте снова.'
+          });
     }
   };
 

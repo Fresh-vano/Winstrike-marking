@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Image, StyleSheet, ScrollView, ActivityIndicator, Alert, TextInput, Button, Modal, TouchableOpacity } from 'react-native';
 import { Text, Card } from 'react-native-paper';
 import { fetchHistoryDetail, updateRecognition  } from '../api/history';
-import { toast } from 'react-toastify';
+import Toast from 'react-native-toast-message';
 
 const HistoryDetailScreen = ({ route }) => {
     const { id } = route.params;
@@ -134,7 +134,10 @@ const HistoryDetailScreen = ({ route }) => {
       }
     } catch (err) {
       setError(err);
-      toast.error('Не удалось загрузить детали анализа. Попробуйте позже.');
+      Toast.show({
+        type: 'error',
+        text1: 'Не удалось загрузить детали анализа. Попробуйте позже.'
+      });
     } finally {
       setLoading(false);
     }
@@ -151,10 +154,16 @@ const HistoryDetailScreen = ({ route }) => {
         correct_part_number: correctPartNumber,
         correct_order_number: correctOrderNumber,
       });
-      toast.success('Данные успешно обновлены');
+      Toast.show({
+        type: 'success',
+        text1: 'Данные успешно обновлены'
+      });
       await getDetail(); // обновляем детали после сохранения
     } catch (error) {
-      toast.error('Не удалось сохранить данные. Попробуйте снова.');
+        Toast.show({
+            type: 'error',
+            text1: 'Не удалось сохранить данные. Попробуйте снова.'
+          });
     } finally {
       setUpdating(false); // завершаем процесс обновления
     }

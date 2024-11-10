@@ -4,7 +4,7 @@ import { Text, Card } from 'react-native-paper';
 import { fetchStats } from '../api/stats';
 import { LineChart, PieChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';  
-import { toast } from 'react-toastify';
+import Toast from 'react-native-toast-message';
 
 const StatsScreen = () => {
   const [stats, setStats] = useState(null);
@@ -29,7 +29,10 @@ const StatsScreen = () => {
         setStats(data);
       } catch (err) {
         setError(err);
-        toast.error('Не удалось загрузить статистику. Попробуйте позже.');
+        Toast.show({
+          type: 'error',
+          text1: 'Не удалось загрузить статистику. Попробуйте позже.'
+        });
       } finally {
         setLoading(false);
       }

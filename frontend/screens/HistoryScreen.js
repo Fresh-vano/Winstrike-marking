@@ -4,7 +4,7 @@ import { View, FlatList, Image, StyleSheet, TouchableOpacity, ActivityIndicator,
 import { Text, Card } from 'react-native-paper';
 import { fetchHistory } from '../api/history';
 import { useFocusEffect } from '@react-navigation/native';  
-import { toast } from 'react-toastify';
+import Toast from 'react-native-toast-message';
 import { REACT_APP_API_URL } from '@env';
 
 const HistoryScreen = ({ navigation }) => {
@@ -21,7 +21,10 @@ const HistoryScreen = ({ navigation }) => {
           setHistory(data);
         } catch (err) {
           setError(err);
-          toast.error('Не удалось загрузить историю. Попробуйте позже.');
+          Toast.show({
+            type: 'error',
+            text1: 'Не удалось загрузить историю. Попробуйте позже.'
+          });
         } finally {
           setLoading(false);
         }
