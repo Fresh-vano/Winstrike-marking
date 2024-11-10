@@ -73,4 +73,8 @@ https://github.com/user-attachments/assets/bf98d448-03b3-4485-9a31-e532016ca521
 ### Пример работы десктопной версии приложения представлен на следующем скринкасте:
 
 
+https://github.com/user-attachments/assets/6e82958f-e60a-409c-9244-84af29c98925
+
+
+
 Все права защищены. &copy; Winstrike.
