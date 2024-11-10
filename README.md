@@ -16,7 +16,7 @@
 *1. Скачайте репозиторий:*
 
 ```bash
-    git clone https://github.com/Fresh-vano/Winstrike-marking.git
+git clone https://github.com/Fresh-vano/Winstrike-marking.git
 ```
 
 *2. Скопируйте файл `docker-compose.yml`*
@@ -24,11 +24,11 @@
 *3. Через переменные окружения можно задать в файле `docker-compose.yml` следующие параметры:*
 
 ```bash
-    POSTGRES_USER=<имя пользователя бд>
-    POSTGRES_PASSWORD=<пароль>
-    POSTGRES_DB=<название базы данных>
-    DATABASE_URL=<строка подключения к бд>
-    REACT_APP_API_URL=<url до бекенда>
+POSTGRES_USER=<имя пользователя бд>
+POSTGRES_PASSWORD=<пароль>
+POSTGRES_DB=<название базы данных>
+DATABASE_URL=<строка подключения к бд>
+REACT_APP_API_URL=<url до бекенда>
 ```
 
 *4. Выполнить команду для скачивания и развертывания контейнеров:*
@@ -49,7 +49,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 *1. Перейдите в папку `full_launch`.*
 
-*2. Для удобного запуска создайте виртуальное окружение, выполнив команду:*
+*2. Для удобного запуска создайте виртуальное окружение выполнив команду:*
 ```python
 python -m venv .venv
 ```
